@@ -94,9 +94,9 @@ data-warehouse-project/
 │   ├── DataArchitecture.png            # Overall system architecture
 │   ├── DataCatalog.md                  # Dataset catalog with metadata and field descriptions
 │   ├── DataFlow.png                    # Data flow diagrams
-│   ├── DataIntegration.png             # Data integration processes and ETL workflows 
+│   ├── DataIntegration.png             # Documentation of relations between tables
 │   ├── DataModels.png                  # Star schema data models
-│   └── NamingConventions.md           # Naming standards for tables, columns, and files
+│   └── NamingConventions.md            # Naming standards for tables, columns, and files
 │
 ├── Scripts/                            # SQL scripts for ETL and transformations
 │   ├── Bronze/                         # Raw data ingestion scripts
