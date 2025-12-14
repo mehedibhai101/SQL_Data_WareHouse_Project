@@ -49,13 +49,13 @@ IF OBJECT_ID('Bronze.crm_cust_info', 'U') IS NOT NULL
 	DROP TABLE Bronze.crm_cust_info;
 
 CREATE TABLE Bronze.crm_cust_info (
-	cst_id				      INT,
-	cst_key				      NVARCHAR(50),
-	cst_first_name		  NVARCHAR(50),
-	cst_last_name		    NVARCHAR(50),
+	cst_id				INT,
+	cst_key				NVARCHAR(50),
+	cst_first_name		NVARCHAR(50),
+	cst_last_name		NVARCHAR(50),
 	cst_marital_status	NVARCHAR(50),
-	cst_gender			    NVARCHAR(50),
-	cst_create_date		  DATE
+	cst_gender			NVARCHAR(50),
+	cst_create_date		DATE
 );
 GO
 
@@ -65,11 +65,11 @@ IF OBJECT_ID('Bronze.crm_prd_info', 'U') IS NOT NULL
 	DROP TABLE Bronze.crm_prd_info;
 
 CREATE TABLE Bronze.crm_prd_info (
-	prd_id			  INT,
-	prd_key			  NVARCHAR(50),
-	prd_nm			  NVARCHAR(50),
-	pd_cost			  INT, --no decimal costs in source
-	prd_line		  NVARCHAR(50),
+	prd_id			INT,
+	prd_key			NVARCHAR(50),
+	prd_nm			NVARCHAR(50),
+	pd_cost			INT, --there's no decimal cost in the system
+	prd_line		NVARCHAR(50),
 	prd_start_dt	DATETIME,
 	prd_end_dt		DATETIME
 );
@@ -87,9 +87,9 @@ CREATE TABLE Bronze.crm_sales_details (
 	sls_order_dt	INT,
 	sls_ship_dt		INT,
 	sls_due_dt		INT,
-	sls_sales		  INT, --no decimal costs in source
+	sls_sales		INT, --as no product has a decimal cost
 	sls_quantity	INT,
-	sls_price		  INT
+	sls_price		INT
 );
 GO
 
@@ -122,9 +122,9 @@ IF OBJECT_ID('Bronze.erp_px_cat_g1v2', 'U') IS NOT NULL
 	DROP TABLE Bronze.erp_px_cat_g1v2;
 
 CREATE TABLE Bronze.erp_px_cat_g1v2 (
-	id				    NVARCHAR(50),
-	cat				    NVARCHAR(50),
-	subcat			  NVARCHAR(50),
+	id				NVARCHAR(50),
+	cat				NVARCHAR(50),
+	subcat			NVARCHAR(50),
 	maintainance	NVARCHAR(50)
 );
 GO
