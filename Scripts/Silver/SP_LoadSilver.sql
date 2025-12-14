@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-                Load Data into Silver Layer (Bulk Insert)
+                	Load Data into Silver Layer (CTAS)
 ===========================================================================
 
 Script Purpose:
@@ -78,13 +78,35 @@ BEGIN
 		TRUNCATE TABLE Silver.crm_cust_info;
 
 		PRINT '>> Inserting Data Into: Silver.crm_cust_info';
-		BULK INSERT Silver.crm_cust_info
-		FROM 'C:\Users\perennial\SQL\SQL_Data_Warehouse_Project\Datasets\CRM\cust_info.csv'
-		WITH (
-			FIRSTROW = 2, -- First rows from source files contains header
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SELECT
+		    cst_id,
+		    cst_key,
+		    TRIM( cst_first_name ) cst_first_name,
+		    TRIM( cst_last_name ) cst_last_name,
+		    CASE UPPER( TRIM( cst_marital_status ) )
+		        WHEN 'M' THEN 'Married'
+		        WHEN 'S' THEN 'Single'
+		        ELSE 'n/a'
+		    END cst_marital_status,
+		    CASE UPPER( TRIM( cst_gender ) )
+		        WHEN 'M' THEN 'Male'
+		        WHEN 'F' THEN 'Female'
+		        ELSE 'n/a'
+		    END cst_gender,
+		    CASE WHEN cst_create_date < '1990-01-01' -- business's creation date
+		            OR cst_create_date > GETDATE()
+		        THEN NULL
+		        ELSE cst_create_date
+		    END cst_create_date
+		INTO Silver.crm_cust_info 
+		FROM 
+		    (SELECT
+		        *,
+		        ROW_NUMBER() OVER( PARTITION BY cst_id ORDER BY cst_create_date DESC ) flag_duplicate
+		    FROM Bronze.crm_cust_info
+		    WHERE cst_id IS NOT NULL
+		)t
+		WHERE flag_duplicate = 1;
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
@@ -98,13 +120,25 @@ BEGIN
 		TRUNCATE TABLE Silver.crm_prd_info;
 
 		PRINT '>> Inserting Data Into: Silver.crm_prd_info';
-		BULK INSERT Silver.crm_prd_info
-		FROM 'C:\Users\perennial\SQL\SQL_Data_Warehouse_Project\Datasets\CRM\prd_info.csv'
-		WITH (
-			FIRSTROW = 2, -- First rows from source files contains header
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SELECT
+		    prd_id,
+		    REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) cat_id,
+		    SUBSTRING( TRIM( prd_key ), 7) prd_key,
+		    prd_nm,
+		    COALESCE(prd_cost, 0) prd_cost,
+		    CASE UPPER( TRIM( prd_line ) )
+		        WHEN 'M' THEN 'Mountain'
+		        WHEN 'R' THEN 'Road'
+		        WHEN 'T' THEN 'Touring'
+		        WHEN 'S' THEN 'Others'
+		        ELSE 'n/a'
+		    END prd_line,
+		    CAST( prd_start_dt AS DATE ) prd_start_dt,
+		    CAST(
+		        LEAD(prd_start_dt) OVER( PARTITION BY prd_key ORDER BY prd_start_dt ASC) -1
+		        AS DATE ) prd_end_dt
+		INTO Silver.crm_prd_info
+		FROM Bronze.crm_prd_info;
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
@@ -118,13 +152,40 @@ BEGIN
 		TRUNCATE TABLE Silver.crm_sales_details;
 
 		PRINT '>> Inserting Data Into: Silver.crm_sales_details';
-		BULK INSERT Silver.crm_sales_details
-		FROM 'C:\Users\perennial\SQL\SQL_Data_Warehouse_Project\Datasets\CRM\sales_details.csv'
-		WITH (
-			FIRSTROW = 2, -- First rows from source files contains header
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SELECT
+		    sls_ord_num,
+		    sls_prd_key,
+		    sls_cust_id,
+		
+		    CASE WHEN sls_order_dt <= 0 OR LEN( sls_order_dt ) != 8
+		        THEN NULL
+		        ELSE CAST( CAST( sls_order_dt AS NVARCHAR ) AS DATE )
+		    END sls_order_dt,
+		
+		    CASE WHEN sls_ship_dt <= 0 OR LEN( sls_ship_dt ) != 8
+		        THEN NULL
+		        ELSE CAST( CAST( sls_ship_dt AS NVARCHAR ) AS DATE )
+		    END sls_ship_dt,
+		
+		    CASE WHEN sls_due_dt <= 0 OR LEN( sls_due_dt ) != 8
+		        THEN NULL
+		        ELSE CAST( CAST( sls_due_dt AS NVARCHAR ) AS DATE )
+		    END sls_due_dt,
+		
+		    CASE WHEN sls_sales <=0 OR sls_sales IS NULL OR sls_sales != ( sls_quantity * ABS(sls_price) )
+		        THEN ( sls_quantity * ABS(sls_price) )
+		        ELSE sls_sales
+		    END sls_sales,
+		
+		    sls_quantity,
+		
+		    CASE WHEN sls_price <=0 OR sls_price IS NULL
+		        THEN ABS( sls_sales ) / NULLIF( sls_quantity, 0 )
+		        ELSE sls_price
+		    END sls_price
+		
+		INTO Silver.crm_sales_details
+		FROM Bronze.crm_sales_details;
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
@@ -145,13 +206,23 @@ BEGIN
 		TRUNCATE TABLE Silver.erp_cust_az12;
 
 		PRINT '>> Inserting Data Into: Silver.erp_cust_az12';
-		BULK INSERT Silver.erp_cust_az12
-		FROM 'C:\Users\perennial\SQL\SQL_Data_Warehouse_Project\Datasets\ERP\cust_az12.csv'
-		WITH (
-			FIRSTROW = 2, -- First rows from source files contains header
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SELECT
+		    CASE
+		        WHEN TRIM( cid ) LIKE 'NAS%'
+		        THEN SUBSTRING( cid, 4)
+		        ELSE cid
+		    END cid,
+		    CASE
+				WHEN bdate > GETDATE() THEN NULL
+				ELSE bdate
+			END bdate,
+		    CASE 
+		        WHEN UPPER( TRIM( gen ) ) IN ('M', 'MALE') THEN 'Male'
+		        WHEN UPPER( TRIM( gen ) ) IN ('F', 'FEMALE') THEN 'Female'
+		        ELSE 'n/a'
+		    END gen
+		INTO Silver.erp_cust_az12
+		FROM Bronze.erp_cust_az12;
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
@@ -165,13 +236,16 @@ BEGIN
 		TRUNCATE TABLE Silver.erp_loc_a101;
 	
 		PRINT '>> Inserting Data Into: Silver.erp_loc_a101';
-		BULK INSERT Silver.erp_loc_a101
-		FROM 'C:\Users\perennial\SQL\SQL_Data_Warehouse_Project\Datasets\ERP\loc_a101.csv'
-		WITH (
-			FIRSTROW = 2, -- First rows from source files contains header
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SELECT
+		    REPLACE( TRIM(cid), '-', '' ) cid,
+		    CASE
+		        WHEN TRIM( cntry ) = 'DE' THEN 'Germany'
+				WHEN TRIM( cntry ) IN ('US', 'USA') THEN 'United States'
+				WHEN TRIM( cntry ) = '' OR cntry IS NULL THEN 'n/a'
+				ELSE TRIM( cntry )
+			END AS cntry
+		INTO Silver.erp_loc_a101
+		FROM Bronze.erp_loc_a101;
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
@@ -185,13 +259,14 @@ BEGIN
 		TRUNCATE TABLE Silver.erp_px_cat_g1v2;
 
 		PRINT '>> Inserting Data Into: Silver.erp_px_cat_g1v2';
-		BULK INSERT Silver.erp_px_cat_g1v2
-		FROM 'C:\Users\perennial\SQL\SQL_Data_Warehouse_Project\Datasets\ERP\px_cat_g1v2.csv'
-		WITH (
-			FIRSTROW = 2, -- First rows from source files contains header
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
+		SELECT
+		    CASE WHEN id='CO_PD' THEN 'CO_PE' ELSE id
+		    END id,
+		    cat,
+		    subcat,
+		    maintainance
+		INTO Silver.erp_px_cat_g1v2
+		FROM Bronze.erp_px_cat_g1v2;
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
