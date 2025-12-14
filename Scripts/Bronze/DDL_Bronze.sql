@@ -68,7 +68,7 @@ CREATE TABLE Bronze.crm_prd_info (
 	prd_id			INT,
 	prd_key			NVARCHAR(50),
 	prd_nm			NVARCHAR(50),
-	pd_cost			INT, --there's no decimal cost in the system
+	prd_cost		INT, --there's no decimal cost in the system
 	prd_line		NVARCHAR(50),
 	prd_start_dt	DATETIME,
 	prd_end_dt		DATETIME
