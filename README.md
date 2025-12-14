@@ -41,7 +41,7 @@ This project includes:
 
 All tools listed below are **free to use**:
 
-* **[Datasets](datasets/)**: Project datasets (CSV files).
+* **[Datasets](Datasets/)**: Project datasets (CSV files).
 * **[SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)**: Lightweight SQL Server edition for hosting the database.
 * **[SQL Server Management Studio (SSMS)](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16)**: Graphical interface for managing SQL Server databases.
 * **[GitHub](https://github.com/)**: Version control and collaboration platform.
@@ -81,8 +81,6 @@ Develop SQL-based analytics to deliver insights into:
 
 These insights empower stakeholders with key business metrics to support strategic decision-making.
 
-For more details, see [docs/requirements.md](docs/requirements.md).
-
 ---
 
 ## 📂 Repository Structure
@@ -90,27 +88,26 @@ For more details, see [docs/requirements.md](docs/requirements.md).
 ```
 data-warehouse-project/
 │
-├── datasets/                           # Raw ERP and CRM datasets
+├── Datasets/                           # Raw ERP and CRM datasets
+│ 
+├── Docs/                               # Documentation and architecture artifacts
+│   ├── DataArchitecture.png            # Overall system architecture
+│   ├── DataCatalog.md                  # Dataset catalog with metadata and field descriptions
+│   ├── DataFlow.png                    # Data flow diagrams
+│   ├── DataIntegration.png             # Data integration processes and ETL workflows 
+│   ├── DataModels.png                  # Star schema data models
+│   └── NamingConventions.md           # Naming standards for tables, columns, and files
 │
-├── docs/                               # Documentation and architecture artifacts
-│   ├── etl.drawio                      # ETL techniques and methods
-│   ├── data_architecture.drawio        # Overall system architecture
-│   ├── data_catalog.md                 # Dataset catalog with metadata and field descriptions
-│   ├── data_flow.drawio                # Data flow diagrams
-│   ├── data_models.drawio              # Star schema data models
-│   ├── naming-conventions.md           # Naming standards for tables, columns, and files
+├── Scripts/                            # SQL scripts for ETL and transformations
+│   ├── Bronze/                         # Raw data ingestion scripts
+│   ├── Silver/                         # Data cleansing and transformation scripts
+│   └── Gold/                           # Analytical model scripts
 │
-├── scripts/                            # SQL scripts for ETL and transformations
-│   ├── bronze/                         # Raw data ingestion scripts
-│   ├── silver/                         # Data cleansing and transformation scripts
-│   ├── gold/                           # Analytical model scripts
-│
-├── tests/                              # Data quality and validation tests
+├── Tests/                              # Data quality and validation tests
 │
 ├── README.md                           # Project overview and setup instructions
 ├── LICENSE                             # License information
-├── .gitignore                          # Git ignore rules
-└── requirements.txt                    # Project dependencies
+└── .gitignore                          # Git ignore rules
 ```
 
 ---
@@ -123,7 +120,7 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 
 ## 🌟 About Me
 
-Hi! I’m **Mehedi Hasan**, well known as **Mehedi Bhai**,a Certified Data Analyst with strong proficiency in *Excel*, *Power BI*, and *SQL*. I specialize in data visualization, transforming raw data into clear, meaningful insights that help businesses make impactful data-driven decisions.
+Hi! I’m **Mehedi Hasan**, well known as **Mehedi Bhai**, a Certified Data Analyst with strong proficiency in *Excel*, *Power BI*, and *SQL*. I specialize in data visualization, transforming raw data into clear, meaningful insights that help businesses make impactful data-driven decisions.
 
 Let’s connect:
 
