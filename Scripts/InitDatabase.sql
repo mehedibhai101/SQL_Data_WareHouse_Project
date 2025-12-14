@@ -4,14 +4,13 @@
 ===========================================================================
 
 Script Purpose:
-
 This script creates a database named 'DataWarehouse'. If the database already
 exists,it will be dropped and recreated. After creation, the script initializes
 three schemas within the database: 'Bronze', 'Silver', and 'Gold'.
 
----
-
+---------------------------------------------------------------------------
 ⚠️ CRITICAL WARNING
+---------------------------------------------------------------------------
 
 If DataWarehouse already exists, running this script will permanently delete
 the entire database and all its data before recreating it.
