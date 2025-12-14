@@ -49,11 +49,11 @@ BEGIN
 		SET @batch_start_time = GETDATE();
 
 		PRINT '=======================================================';
-		PRINT '				         Loading Bronze Layer';
+		PRINT '				  Loading Bronze Layer';
 		PRINT '=======================================================';
 
 		PRINT '-------------------------------------------------------';
-		PRINT '				          Loading CRM Tables';
+		PRINT '				   Loading CRM Tables';
 		PRINT '-------------------------------------------------------';
 
 
@@ -120,7 +120,7 @@ BEGIN
 
 		PRINT '';
 		PRINT '-------------------------------------------------------';
-		PRINT '				          Loading ERP Tables';
+		PRINT '				  Loading ERP Tables';
 		PRINT '-------------------------------------------------------';
 
 
@@ -188,7 +188,7 @@ BEGIN
 		SET @batch_end_time = GETDATE();
 		PRINT '';
 		PRINT '=======================================================';
-		PRINT '		       Completed Loading The Bronze Layer';
+		PRINT '		   Completed Loading The Bronze Layer';
 		PRINT '=======================================================';
 		PRINT 'Total Loading Duration: ' + CAST(DATEDIFF(second, @batch_start_time, @batch_end_time) AS NVARCHAR) + ' seconds';
 
@@ -198,7 +198,7 @@ BEGIN
 	BEGIN CATCH
 		PRINT '';
 		PRINT '=======================================================';
-		PRINT '	     AN ERROR OCCURED LOADING THE BRONZE LAYER!';
+		PRINT '	   AN ERROR OCCURED LOADING THE BRONZE LAYER!';
 		PRINT '=======================================================';
 		PRINT 'Error Message: ' + ERROR_MESSAGE();
 		PRINT 'Error Number: ' + CAST(ERROR_NUMBER() AS VARCHAR);
@@ -213,4 +213,3 @@ GO
 
 EXEC Bronze.load_bronze;
 GO
-
