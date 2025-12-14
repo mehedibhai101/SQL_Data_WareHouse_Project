@@ -9,6 +9,18 @@ data from source CSV files (CRM and ERP) into the Bronze-layer tables of the
 'DataWarehouse' database. The procedure truncates each table before inserting
 fresh data to ensure that only the latest dataset is present.
 
+Tables Truncated & Inserted Data:
+
+CRM Source System:
+    - crm_cust_info       : Customer information
+    - crm_prd_info        : Product information
+    - crm_sales_details   : Sales data
+
+ERP Source System:
+    - erp_cust_az12       : Customer demographics
+    - erp_loc_a101        : Customer locations
+    - erp_px_cat_g1v2     : Product category information
+
 Key Features:
 - Measures and prints load durations for each table and the entire batch.
 - Uses TRY…CATCH for error handling and prints detailed error messages if
