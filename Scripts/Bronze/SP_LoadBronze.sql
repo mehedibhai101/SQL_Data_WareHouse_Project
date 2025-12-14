@@ -9,24 +9,18 @@ data from source CSV files (CRM and ERP) into the Bronze-layer tables of the
 'DataWarehouse' database. The procedure truncates each table before inserting
 fresh data to ensure that only the latest dataset is present.
 
-Tables Loaded:
-
-CRM Source System:
-    - crm_cust_info       : Customer information
-    - crm_prd_info        : Product information
-    - crm_sales_details   : Sales transactions
-
-ERP Source System:
-    - erp_cust_az12       : Customer master
-    - erp_loc_a101        : Customer locations
-    - erp_px_cat_g1v2     : Product category information
-
 Key Features:
 - Measures and prints load durations for each table and the entire batch.
 - Uses TRY…CATCH for error handling and prints detailed error messages if
   the loading process fails.
 - Bulk Insert is performed from CSV files located in source directories.
 - Tables are truncated before loading to maintain a clean dataset.
+
+Parameters:
+This stored procedure does not accept any parameters or return any values.
+
+Usage Example:
+    EXEC Bronze.load_bronze;
 
 ---------------------------------------------------------------------------
 ⚠️ CRITICAL WARNING
