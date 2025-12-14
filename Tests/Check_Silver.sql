@@ -55,14 +55,14 @@ HAVING cst_key IS NULL OR COUNT(*) > 1;
 
 SELECT
     cst_first_name
-FROM Bronze.crm_cust_info
+FROM Silver.crm_cust_info
 WHERE LEN( cst_first_name ) != LEN( TRIM( cst_first_name ) );
 
 -----
 
 SELECT
     cst_last_name
-FROM Bronze.crm_cust_info
+FROM Silver.crm_cust_info
 WHERE LEN( cst_last_name ) != LEN( TRIM( cst_last_name ) );
 
 
@@ -71,13 +71,13 @@ WHERE LEN( cst_last_name ) != LEN( TRIM( cst_last_name ) );
 
 SELECT 
     DISTINCT cst_marital_status
-FROM Bronze.crm_cust_info;
+FROM Silver.crm_cust_info;
 
 -----
 
 SELECT 
     DISTINCT cst_gender
-FROM Bronze.crm_cust_info;
+FROM Silver.crm_cust_info;
 
 
 -- Check for invalid dates in date column
@@ -85,7 +85,7 @@ FROM Bronze.crm_cust_info;
 
 SELECT
     cst_create_date
-FROM Bronze.crm_cust_info
+FROM Silver.crm_cust_info
 WHERE cst_create_date < '1990-01-01' -- business's creation date
     OR cst_create_date > GETDATE();
 
@@ -104,7 +104,7 @@ WHERE cst_create_date < '1990-01-01' -- business's creation date
 SELECT
     prd_id,
     COUNT(*) TimesRepeated
-FROM Bronze.crm_prd_info
+FROM Silver.crm_prd_info
 GROUP BY prd_id 
 HAVING prd_id IS NULL OR COUNT(*) > 1;
 /* cat_id & prd_id are not PK because of the Historization) */
@@ -115,7 +115,7 @@ HAVING prd_id IS NULL OR COUNT(*) > 1;
 
 SELECT
     prd_nm
-FROM Bronze.crm_prd_info
+FROM Silver.crm_prd_info
 WHERE LEN( prd_nm ) != LEN( TRIM( prd_nm ) );
 
 
@@ -124,7 +124,7 @@ WHERE LEN( prd_nm ) != LEN( TRIM( prd_nm ) );
 
 SELECT 
     DISTINCT prd_line
-FROM Bronze.crm_prd_info;
+FROM Silver.crm_prd_info;
 
 
 -- Check for invalid costs
@@ -132,7 +132,7 @@ FROM Bronze.crm_prd_info;
 
 SELECT
     prd_cost
-FROM Bronze.crm_prd_info
+FROM Silver.crm_prd_info
 WHERE prd_cost IS NULL OR prd_cost<0;
 
 
@@ -142,7 +142,7 @@ WHERE prd_cost IS NULL OR prd_cost<0;
 SELECT
     prd_start_dt,
     prd_end_dt
-FROM Bronze.crm_prd_info
+FROM Silver.crm_prd_info
 WHERE prd_start_dt > prd_end_dt
     OR prd_start_dt < '1990-01-01' -- business's creation date
     OR prd_start_dt > GETDATE();
@@ -161,7 +161,7 @@ WHERE prd_start_dt > prd_end_dt
 
 SELECT
     sls_order_dt
-FROM Bronze.crm_sales_details
+FROM Silver.crm_sales_details
 WHERE sls_order_dt <=0
     OR LEN( sls_order_dt ) != 8
     OR sls_order_dt < 19900101 -- business's creation date
@@ -173,7 +173,7 @@ WHERE sls_order_dt <=0
 
 SELECT
     sls_ship_dt
-FROM Bronze.crm_sales_details
+FROM Silver.crm_sales_details
 WHERE sls_ship_dt <=0
     OR LEN( sls_ship_dt ) != 8
     OR sls_ship_dt < 19900101 -- business's creation date
@@ -183,7 +183,7 @@ WHERE sls_ship_dt <=0
 
 SELECT
     sls_due_dt
-FROM Bronze.crm_sales_details
+FROM Silver.crm_sales_details
 WHERE sls_due_dt <=0
     OR LEN( sls_due_dt ) != 8
     OR sls_due_dt < 19900101 -- business's creation date
@@ -197,7 +197,7 @@ SELECT
     sls_sales,
     sls_quantity,
     sls_price 
-FROM Bronze.crm_sales_details
+FROM Silver.crm_sales_details
 WHERE sls_sales != ( sls_quantity * sls_price )
    OR sls_sales <= 0 
    OR sls_quantity <= 0 
@@ -221,7 +221,7 @@ WHERE sls_sales != ( sls_quantity * sls_price )
 SELECT
     cid,
     COUNT(*) TimesRepeated
-FROM Bronze.erp_cust_az12
+FROM Silver.erp_cust_az12
 GROUP BY cid 
 HAVING cid IS NULL OR COUNT(*) > 1;
 
@@ -231,8 +231,8 @@ HAVING cid IS NULL OR COUNT(*) > 1;
 
 SELECT
     cid
-FROM Bronze.erp_cust_az12
-WHERE cid NOT IN (SELECT cst_key FROM Bronze.crm_cust_info);
+FROM Silver.erp_cust_az12
+WHERE cid NOT IN (SELECT cst_key FROM Silver.crm_cust_info);
 
 
 -- Check for data inconsistency in low-cardinality columns
@@ -240,7 +240,7 @@ WHERE cid NOT IN (SELECT cst_key FROM Bronze.crm_cust_info);
 
 SELECT 
     DISTINCT gen
-FROM Bronze.erp_cust_az12;
+FROM Silver.erp_cust_az12;
 
 
 -- Check for invalid dates in date column
@@ -248,7 +248,7 @@ FROM Bronze.erp_cust_az12;
 
 SELECT
     bdate
-FROM Bronze.erp_cust_az12
+FROM Silver.erp_cust_az12
 WHERE bdate > GETDATE();
 
 
@@ -265,8 +265,8 @@ WHERE bdate > GETDATE();
 
 SELECT
     cid
-FROM Bronze.erp_loc_a101
-WHERE cid NOT IN (SELECT cst_key FROM Bronze.crm_cust_info);
+FROM Silver.erp_loc_a101
+WHERE cid NOT IN (SELECT cst_key FROM Silver.crm_cust_info);
 
 
 -- Check for data inconsistency in low-cardinality columns
@@ -274,7 +274,7 @@ WHERE cid NOT IN (SELECT cst_key FROM Bronze.crm_cust_info);
 
 SELECT 
     DISTINCT cntry
-FROM Bronze.erp_loc_a101
+FROM Silver.erp_loc_a101
 ORDER BY cntry;
 
 
@@ -291,8 +291,8 @@ ORDER BY cntry;
 
 SELECT
     id
-FROM Bronze.erp_px_cat_g1v2
-WHERE id NOT IN (SELECT REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) FROM Bronze.crm_prd_info);
+FROM Silver.erp_px_cat_g1v2
+WHERE id NOT IN (SELECT REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) FROM Silver.crm_prd_info);
 
 
 -- Check for data inconsistency in low-cardinality columns
@@ -300,17 +300,17 @@ WHERE id NOT IN (SELECT REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) FROM Bron
 
 SELECT 
     DISTINCT cat
-FROM Bronze.erp_px_cat_g1v2;
+FROM Silver.erp_px_cat_g1v2;
 
 -----
 
 SELECT 
     DISTINCT subcat
-FROM Bronze.erp_px_cat_g1v2;
+FROM Silver.erp_px_cat_g1v2;
 
 -----
 
 SELECT 
     DISTINCT maintainance
-FROM Bronze.erp_px_cat_g1v2;
+FROM Silver.erp_px_cat_g1v2;
 
