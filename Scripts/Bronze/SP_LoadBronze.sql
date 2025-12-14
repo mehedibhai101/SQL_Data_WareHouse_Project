@@ -118,7 +118,7 @@ BEGIN
 		PRINT '-------------------------------------------------------';
 
 
-		-- ERP : Customer Table
+		-- ERP : Customer Demographics Table
 
 		SET @start_time = GETDATE();
 
