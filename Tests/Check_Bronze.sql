@@ -112,8 +112,7 @@ FROM Bronze.crm_cust_info;
 SELECT
     cst_create_date
 FROM Bronze.crm_cust_info
-WHERE cst_create_date < '1990-01-01' -- business's creation date
-    OR cst_create_date > GETDATE();
+WHERE cst_create_date > GETDATE();
 
 
 
@@ -179,7 +178,7 @@ SELECT
     prd_end_dt
 FROM Bronze.crm_prd_info
 WHERE prd_start_dt > prd_end_dt
-    OR prd_start_dt < '1990-01-01' -- business's creation date
+    OR prd_start_dt < '2010-12-01' -- business's creation date
     OR prd_start_dt > GETDATE();
 
 
@@ -217,7 +216,7 @@ SELECT
 FROM Bronze.crm_sales_details
 WHERE sls_order_dt <=0
     OR LEN( sls_order_dt ) != 8
-    OR sls_order_dt < 19900101 -- business's creation date
+    OR sls_order_dt < 20101201 -- business's creation date
     OR sls_order_dt > REPLACE( CAST( GETDATE() AS DATE ), '-', '' )
     OR sls_order_dt > sls_ship_dt
     OR sls_order_dt > sls_due_dt;
@@ -229,7 +228,7 @@ SELECT
 FROM Bronze.crm_sales_details
 WHERE sls_ship_dt <=0
     OR LEN( sls_ship_dt ) != 8
-    OR sls_ship_dt < 19900101 -- business's creation date
+    OR sls_ship_dt < 20101201 -- business's creation date
     OR sls_ship_dt > REPLACE( CAST( GETDATE() AS DATE ), '-', '' );
 
 -----
@@ -239,7 +238,7 @@ SELECT
 FROM Bronze.crm_sales_details
 WHERE sls_due_dt <=0
     OR LEN( sls_due_dt ) != 8
-    OR sls_due_dt < 19900101 -- business's creation date
+    OR sls_due_dt < 20101201 -- business's creation date
     OR sls_due_dt > REPLACE( CAST( GETDATE()+100 AS DATE ), '-', '' );
 
 
