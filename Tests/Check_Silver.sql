@@ -25,6 +25,35 @@ USE DataWarehouse;
 GO
 
 /*
+===========================================================================
+              Identifying Data Quality Issues (Bronze Layer)
+===========================================================================
+
+Script Purpose:
+This script performs initial data quality checks on the Bronze layer to identify
+raw data issues originating from source systems. These checks help detect data
+problems early before transformation into the Silver layer.
+
+The checks include:
+    - Detection of NULL or duplicate primary keys
+    - Identification of unwanted leading or trailing spaces in string columns
+    - Validation of data standardization and value consistency
+    - Verification of valid date ranges and chronological order
+    - Consistency checks between related attributes and tables
+
+Usage Notes:
+    - Execute this script after loading data into the Bronze layer.
+    - Use the results to identify source system data issues.
+    - Address critical issues before proceeding with Silver-layer transformations.
+
+===========================================================================
+*/
+
+-- Make sure using the correct Database
+USE DataWarehouse;
+GO
+
+/*
 ==========================================================
             Checking for 'Silver.crm_cust_info'
 ==========================================================
@@ -48,6 +77,22 @@ SELECT
 FROM Silver.crm_cust_info
 GROUP BY cst_key 
 HAVING cst_key IS NULL OR COUNT(*) > 1;
+
+
+-- Check for invalid Keys
+-- Expectation: No Results
+
+SELECT
+    cst_key
+FROM Silver.crm_cust_info
+WHERE cst_key NOT IN (SELECT cid FROM Silver.erp_cust_az12);
+
+-----
+
+SELECT
+    cst_key
+FROM Silver.crm_cust_info
+WHERE cst_key NOT IN (SELECT cid FROM Silver.erp_loc_a101);
 
 
 -- Check for unwanted spaces in string columns
@@ -86,8 +131,10 @@ FROM Silver.crm_cust_info;
 SELECT
     cst_create_date
 FROM Silver.crm_cust_info
-WHERE cst_create_date < '1990-01-01' -- business's creation date
-    OR cst_create_date > GETDATE();
+WHERE ( ISDATE( CAST( cst_create_date AS NVARCHAR) ) = 0
+    OR cst_create_date < '1990-01-01' -- business's creation date
+    OR cst_create_date > GETDATE() )
+    AND cst_create_date IS NOT NULL;
 
 
 
@@ -108,6 +155,15 @@ FROM Silver.crm_prd_info
 GROUP BY prd_id 
 HAVING prd_id IS NULL OR COUNT(*) > 1;
 /* cat_id & prd_id are not PK because of the Historization) */
+
+
+-- Check for invalid Keys
+-- Expectation: No Results
+
+SELECT
+    cat_id
+FROM Silver.crm_prd_info
+WHERE cat_id NOT IN (SELECT id FROM Silver.erp_px_cat_g1v2);
 
 
 -- Check for unwanted spaces in string columns
@@ -143,9 +199,12 @@ SELECT
     prd_start_dt,
     prd_end_dt
 FROM Silver.crm_prd_info
-WHERE prd_start_dt > prd_end_dt
+WHERE ( ISDATE( CAST( prd_start_dt AS NVARCHAR) ) = 0
+    OR ISDATE( CAST( prd_end_dt AS NVARCHAR) ) = 0
+    OR prd_start_dt > prd_end_dt
     OR prd_start_dt < '1990-01-01' -- business's creation date
-    OR prd_start_dt > GETDATE();
+    OR prd_start_dt > GETDATE() )
+    AND prd_end_dt IS NOT NULL;
 
 
 
@@ -156,38 +215,56 @@ WHERE prd_start_dt > prd_end_dt
 ==========================================================
 */
 
+-- Check for invalid Keys
+-- Expectation: No Results
+
+SELECT
+    sls_cust_id
+FROM Silver.crm_sales_details
+WHERE sls_cust_id NOT IN (SELECT cst_id FROM Silver.crm_cust_info)
+    AND sls_cust_id NOT IN (SELECT RIGHT(cid, 5) FROM Silver.erp_cust_az12)
+    AND sls_cust_id NOT IN (SELECT RIGHT(cid, 5) FROM Silver.erp_loc_a101);
+
+-----
+
+SELECT
+    sls_prd_key
+FROM Silver.crm_sales_details
+WHERE sls_prd_key NOT IN (SELECT prd_key FROM Silver.crm_prd_info);
+
+
 -- Check for invalid date keys
 -- Expectation: No Results
 
 SELECT
     sls_order_dt
 FROM Silver.crm_sales_details
-WHERE sls_order_dt <=0
-    OR LEN( sls_order_dt ) != 8
-    OR sls_order_dt < 19900101 -- business's creation date
-    OR sls_order_dt > REPLACE( CAST( GETDATE() AS DATE ), '-', '' )
+WHERE ( ISDATE( CAST( sls_order_dt AS NVARCHAR) ) = 0
+    OR sls_order_dt < '1990-01-01' -- business's creation date
+    OR sls_order_dt > GETDATE()
     OR sls_order_dt > sls_ship_dt
-    OR sls_order_dt > sls_due_dt;
+    OR sls_order_dt > sls_due_dt )
+    AND sls_order_dt IS NOT NULL;
 
------
+----- 
 
 SELECT
     sls_ship_dt
 FROM Silver.crm_sales_details
-WHERE sls_ship_dt <=0
-    OR LEN( sls_ship_dt ) != 8
-    OR sls_ship_dt < 19900101 -- business's creation date
-    OR sls_ship_dt > REPLACE( CAST( GETDATE() AS DATE ), '-', '' );
+WHERE ( ISDATE( CAST( sls_ship_dt AS NVARCHAR) ) = 0
+    OR sls_ship_dt < '1990-01-01' -- business's creation date
+    OR sls_ship_dt > GETDATE() )
+    AND sls_ship_dt IS NOT NULL;
 
 -----
 
 SELECT
     sls_due_dt
 FROM Silver.crm_sales_details
-WHERE sls_due_dt <=0
-    OR LEN( sls_due_dt ) != 8
-    OR sls_due_dt < 19900101 -- business's creation date
-    OR sls_due_dt > REPLACE( CAST( GETDATE()+100 AS DATE ), '-', '' );
+WHERE ( ISDATE( CAST( sls_due_dt AS NVARCHAR) ) = 0
+    OR sls_due_dt < '1990-01-01' -- business's creation date
+    OR sls_due_dt > GETDATE() )
+    AND sls_due_dt IS NOT NULL;
 
 
 -- Check for invalid integers: quantity, price, sales
@@ -249,7 +326,9 @@ FROM Silver.erp_cust_az12;
 SELECT
     bdate
 FROM Silver.erp_cust_az12
-WHERE bdate > GETDATE();
+WHERE ( ISDATE( CAST( bdate AS NVARCHAR) ) = 0
+    OR bdate > GETDATE() )
+    AND bdate IS NOT NULL;
 
 
 
@@ -292,7 +371,7 @@ ORDER BY cntry;
 SELECT
     id
 FROM Silver.erp_px_cat_g1v2
-WHERE id NOT IN (SELECT REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) FROM Silver.crm_prd_info);
+WHERE id NOT IN (SELECT cat_id FROM Silver.crm_prd_info);
 
 
 -- Check for data inconsistency in low-cardinality columns
