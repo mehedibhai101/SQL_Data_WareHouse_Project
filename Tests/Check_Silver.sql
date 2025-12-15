@@ -320,6 +320,17 @@ SELECT
 FROM Silver.erp_cust_az12;
 
 
+-- Check for data integrity (same info from diff sources)
+-- Expectation: Matching and non-null results for bpth
+
+SELECT DISTINCT
+    c.cst_gender,
+    cd.gen
+FROM Silver.crm_cust_info c
+LEFT JOIN Silver.erp_cust_az12 cd
+ON c.cst_key = cd.cid;
+
+
 -- Check for invalid dates in date column
 -- Expectation: No Results
 
