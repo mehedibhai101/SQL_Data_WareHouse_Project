@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-                	Load Data into Silver Layer (CTAS)
+              Load Data into Silver Layer (Insert from Query)
 ===========================================================================
 
 Script Purpose:
@@ -78,6 +78,16 @@ BEGIN
 		TRUNCATE TABLE Silver.crm_cust_info;
 
 		PRINT '>> Inserting Data Into: Silver.crm_cust_info';
+		INSERT INTO Silver.crm_cust_info (
+			cst_id,
+			cst_key,
+			cst_first_name,
+			cst_last_name,
+			cst_marital_status,
+			cst_gender,
+			cst_create_date
+		)
+			
 		SELECT
 		    cst_id,
 		    cst_key,
@@ -98,7 +108,6 @@ BEGIN
 		        THEN NULL
 		        ELSE cst_create_date
 		    END cst_create_date
-		INTO Silver.crm_cust_info 
 		FROM 
 		    (SELECT
 		        *,
@@ -120,6 +129,17 @@ BEGIN
 		TRUNCATE TABLE Silver.crm_prd_info;
 
 		PRINT '>> Inserting Data Into: Silver.crm_prd_info';
+		INSERT INTO Silver.crm_prd_info (
+			prd_id,
+			cat_id,
+			prd_key,
+			prd_nm,
+			prd_cost,
+			prd_line,
+			prd_start_dt,
+			prd_end_dt
+		)
+			
 		SELECT
 		    prd_id,
 		    REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) cat_id,
@@ -137,7 +157,6 @@ BEGIN
 		    CAST(
 		        LEAD(prd_start_dt) OVER( PARTITION BY prd_key ORDER BY prd_start_dt ASC) -1
 		        AS DATE ) prd_end_dt
-		INTO Silver.crm_prd_info
 		FROM Bronze.crm_prd_info;
 
 		SET @end_time = GETDATE();
@@ -152,6 +171,18 @@ BEGIN
 		TRUNCATE TABLE Silver.crm_sales_details;
 
 		PRINT '>> Inserting Data Into: Silver.crm_sales_details';
+		INSERT INTO Silver.crm_sales_details (
+			sls_ord_num,
+			sls_prd_key,
+			sls_cust_id,
+			sls_order_dt,
+			sls_ship_dt,
+			sls_due_dt,
+			sls_sales,
+			sls_quantity,
+			sls_price
+		)
+			
 		SELECT
 		    sls_ord_num,
 		    sls_prd_key,
@@ -184,7 +215,6 @@ BEGIN
 		        ELSE sls_price
 		    END sls_price
 		
-		INTO Silver.crm_sales_details
 		FROM Bronze.crm_sales_details;
 
 		SET @end_time = GETDATE();
@@ -206,6 +236,12 @@ BEGIN
 		TRUNCATE TABLE Silver.erp_cust_az12;
 
 		PRINT '>> Inserting Data Into: Silver.erp_cust_az12';
+		INSERT INTO Silver.erp_cust_az12(
+			cid,
+			bdate,
+			gen
+		)
+			
 		SELECT
 		    CASE
 		        WHEN TRIM( cid ) LIKE 'NAS%'
@@ -221,7 +257,6 @@ BEGIN
 		        WHEN UPPER( TRIM( gen ) ) IN ('F', 'FEMALE') THEN 'Female'
 		        ELSE 'n/a'
 		    END gen
-		INTO Silver.erp_cust_az12
 		FROM Bronze.erp_cust_az12;
 
 		SET @end_time = GETDATE();
@@ -236,6 +271,11 @@ BEGIN
 		TRUNCATE TABLE Silver.erp_loc_a101;
 	
 		PRINT '>> Inserting Data Into: Silver.erp_loc_a101';
+		INSERT INTO Silver.erp_loc_a101 (
+			cid,
+			cntry
+		)
+			
 		SELECT
 		    REPLACE( TRIM(cid), '-', '' ) cid,
 		    CASE
@@ -244,7 +284,6 @@ BEGIN
 				WHEN TRIM( cntry ) = '' OR cntry IS NULL THEN 'n/a'
 				ELSE TRIM( cntry )
 			END AS cntry
-		INTO Silver.erp_loc_a101
 		FROM Bronze.erp_loc_a101;
 
 		SET @end_time = GETDATE();
@@ -259,13 +298,19 @@ BEGIN
 		TRUNCATE TABLE Silver.erp_px_cat_g1v2;
 
 		PRINT '>> Inserting Data Into: Silver.erp_px_cat_g1v2';
+		INSERT INTO Silver.erp_px_cat_g1v2 (
+			id,
+			cat,
+			subcat,
+			maintainance
+		)
+			
 		SELECT
 		    CASE WHEN id='CO_PD' THEN 'CO_PE' ELSE id
 		    END id,
 		    cat,
 		    subcat,
 		    maintainance
-		INTO Silver.erp_px_cat_g1v2
 		FROM Bronze.erp_px_cat_g1v2;
 
 		SET @end_time = GETDATE();
