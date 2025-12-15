@@ -53,6 +53,29 @@ GROUP BY cst_key
 HAVING cst_key IS NULL OR COUNT(*) > 1;
 
 
+-- Check for invalid Keys
+-- Expectation: No Results
+
+SELECT
+    cst_key
+FROM Bronze.crm_cust_info
+WHERE cst_key NOT IN (SELECT
+        CASE
+		    WHEN TRIM( cid ) LIKE 'NAS%'
+		    THEN SUBSTRING( cid, 4)
+		    ELSE cid
+		END cid
+FROM Bronze.erp_cust_az12);
+
+-----
+
+SELECT
+    cst_key
+FROM Bronze.crm_cust_info
+WHERE cst_key NOT IN (SELECT
+        REPLACE( TRIM(cid), '-', '' ) FROM Bronze.erp_loc_a101);
+
+
 -- Check for unwanted spaces in string columns
 -- Expectation: No Results
 
@@ -113,6 +136,15 @@ HAVING prd_id IS NULL OR COUNT(*) > 1;
 /* cat_id & prd_id are not PK because of the Historization) */
 
 
+-- Check for invalid Keys
+-- Expectation: No Results
+
+SELECT
+    REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) cat_id
+FROM Bronze.crm_prd_info
+WHERE REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) NOT IN (SELECT id FROM Bronze.erp_px_cat_g1v2);
+
+
 -- Check for unwanted spaces in string columns
 -- Expectation: No Results
 
@@ -158,6 +190,24 @@ WHERE prd_start_dt > prd_end_dt
          Checking for 'Bronze.crm_sales_details'
 ==========================================================
 */
+
+-- Check for invalid Keys
+-- Expectation: No Results
+
+SELECT
+    sls_cust_id
+FROM Bronze.crm_sales_details
+WHERE sls_cust_id NOT IN (SELECT cst_id FROM Bronze.crm_cust_info)
+    AND sls_cust_id NOT IN (SELECT RIGHT(cid, 5) FROM Bronze.erp_cust_az12)
+    AND sls_cust_id NOT IN (SELECT RIGHT(cid, 5) FROM Bronze.erp_loc_a101);
+
+-----
+
+SELECT
+    sls_prd_key
+FROM Bronze.crm_sales_details
+WHERE sls_prd_key NOT IN (SELECT SUBSTRING( TRIM( prd_key ), 7) FROM Bronze.crm_prd_info);
+
 
 -- Check for invalid date keys
 -- Expectation: No Results
