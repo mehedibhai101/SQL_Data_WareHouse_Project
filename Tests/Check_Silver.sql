@@ -5,34 +5,7 @@
 
 Script Purpose:
 This script performs comprehensive data quality checks on the Silver layer to
-ensure data consistency, accuracy, and standardization. The checks include:
-
-    - Detection of NULL or duplicate primary keys
-    - Identification of unwanted leading or trailing spaces in string columns
-    - Validation of data standardization and value consistency
-    - Verification of valid date ranges and chronological order
-    - Consistency checks between related attributes and tables
-
-Usage Notes:
-    - Execute this script after successfully loading data into the Silver layer.
-    - Review and investigate any issues identified by these checks.
-
-===========================================================================
-*/
-
--- Make sure using the correct Database
-USE DataWarehouse;
-GO
-
-/*
-===========================================================================
-              Identifying Data Quality Issues (Bronze Layer)
-===========================================================================
-
-Script Purpose:
-This script performs initial data quality checks on the Bronze layer to identify
-raw data issues originating from source systems. These checks help detect data
-problems early before transformation into the Silver layer.
+ensure data consistency, accuracy, and standardization.
 
 The checks include:
     - Detection of NULL or duplicate primary keys
@@ -42,9 +15,8 @@ The checks include:
     - Consistency checks between related attributes and tables
 
 Usage Notes:
-    - Execute this script after loading data into the Bronze layer.
-    - Use the results to identify source system data issues.
-    - Address critical issues before proceeding with Silver-layer transformations.
+    - Execute this script after successfully loading data into the Silver layer.
+    - Review and investigate any issues identified by these checks.
 
 ===========================================================================
 */
