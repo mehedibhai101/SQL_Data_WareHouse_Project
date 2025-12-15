@@ -91,20 +91,19 @@ BEGIN
 		SELECT
 		    cst_id,
 		    cst_key,
-		    TRIM( cst_first_name ) cst_first_name,
-		    TRIM( cst_last_name ) cst_last_name,
-		    CASE UPPER( TRIM( cst_marital_status ) )
+		    TRIM( cst_first_name ) cst_first_name, --remove unnecessary spaces
+		    TRIM( cst_last_name ) cst_last_name, --remove unnecessary spaces
+		    CASE UPPER( TRIM( cst_marital_status ) ) --map data with meaningful labels
 		        WHEN 'M' THEN 'Married'
 		        WHEN 'S' THEN 'Single'
 		        ELSE 'n/a'
 		    END cst_marital_status,
-		    CASE UPPER( TRIM( cst_gender ) )
+		    CASE UPPER( TRIM( cst_gender ) ) --map data with meaningful labels
 		        WHEN 'M' THEN 'Male'
 		        WHEN 'F' THEN 'Female'
 		        ELSE 'n/a'
 		    END cst_gender,
-		    CASE WHEN cst_create_date < '1990-01-01' -- business's creation date
-		            OR cst_create_date > GETDATE()
+		    CASE WHEN cst_create_date > GETDATE() --make invalid creation dates null
 		        THEN NULL
 		        ELSE cst_create_date
 		    END cst_create_date
@@ -113,9 +112,9 @@ BEGIN
 		        *,
 		        ROW_NUMBER() OVER( PARTITION BY cst_id ORDER BY cst_create_date DESC ) flag_duplicate
 		    FROM Bronze.crm_cust_info
-		    WHERE cst_id IS NOT NULL
+		    WHERE cst_id IS NOT NULL --remove invalid records
 		)t
-		WHERE flag_duplicate = 1;
+		WHERE flag_duplicate = 1; --keep the latest records only
 
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
@@ -142,20 +141,20 @@ BEGIN
 			
 		SELECT
 		    prd_id,
-		    REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) cat_id,
-		    SUBSTRING( TRIM( prd_key ), 7) prd_key,
+		    REPLACE( LEFT( TRIM( prd_key ), 5), '-', '_' ) cat_id, --extract category id
+		    SUBSTRING( TRIM( prd_key ), 7) prd_key, --keep the product key part
 		    prd_nm,
-		    COALESCE(prd_cost, 0) prd_cost,
-		    CASE UPPER( TRIM( prd_line ) )
+		    COALESCE(prd_cost, 0) prd_cost, --convert null costs into zero
+		    CASE UPPER( TRIM( prd_line ) ) --map data with meaningful labels
 		        WHEN 'M' THEN 'Mountain'
 		        WHEN 'R' THEN 'Road'
 		        WHEN 'T' THEN 'Touring'
 		        WHEN 'S' THEN 'Others'
 		        ELSE 'n/a'
 		    END prd_line,
-		    CAST( prd_start_dt AS DATE ) prd_start_dt,
+		    CAST( prd_start_dt AS DATE ) prd_start_dt, --cast dates into correct type
 		    CAST(
-		        LEAD(prd_start_dt) OVER( PARTITION BY prd_key ORDER BY prd_start_dt ASC) -1
+		        LEAD(prd_start_dt) OVER( PARTITION BY prd_key ORDER BY prd_start_dt ASC) -1 --generate correct end date
 		        AS DATE ) prd_end_dt
 		FROM Bronze.crm_prd_info;
 
@@ -188,29 +187,29 @@ BEGIN
 		    sls_prd_key,
 		    sls_cust_id,
 		
-		    CASE WHEN sls_order_dt <= 0 OR LEN( sls_order_dt ) != 8
+		    CASE WHEN sls_order_dt <= 0 OR LEN( sls_order_dt ) != 8 --handle invalid date keys
 		        THEN NULL
-		        ELSE CAST( CAST( sls_order_dt AS NVARCHAR ) AS DATE )
+		        ELSE CAST( CAST( sls_order_dt AS NVARCHAR ) AS DATE ) --convert datekeys into valid dates
 		    END sls_order_dt,
 		
-		    CASE WHEN sls_ship_dt <= 0 OR LEN( sls_ship_dt ) != 8
+		    CASE WHEN sls_ship_dt <= 0 OR LEN( sls_ship_dt ) != 8 --handle invalid date keys
 		        THEN NULL
-		        ELSE CAST( CAST( sls_ship_dt AS NVARCHAR ) AS DATE )
+		        ELSE CAST( CAST( sls_ship_dt AS NVARCHAR ) AS DATE ) --convert datekeys into valid dates
 		    END sls_ship_dt,
 		
-		    CASE WHEN sls_due_dt <= 0 OR LEN( sls_due_dt ) != 8
+		    CASE WHEN sls_due_dt <= 0 OR LEN( sls_due_dt ) != 8 --handle invalid date keys
 		        THEN NULL
-		        ELSE CAST( CAST( sls_due_dt AS NVARCHAR ) AS DATE )
+		        ELSE CAST( CAST( sls_due_dt AS NVARCHAR ) AS DATE ) --convert datekeys into valid dates
 		    END sls_due_dt,
 		
-		    CASE WHEN sls_sales <=0 OR sls_sales IS NULL OR sls_sales != ( sls_quantity * ABS(sls_price) )
+		    CASE WHEN sls_sales <=0 OR sls_sales IS NULL OR sls_sales != ( sls_quantity * ABS(sls_price) ) --handle invalid sales amounts
 		        THEN ( sls_quantity * ABS(sls_price) )
 		        ELSE sls_sales
 		    END sls_sales,
 		
 		    sls_quantity,
 		
-		    CASE WHEN sls_price <=0 OR sls_price IS NULL
+		    CASE WHEN sls_price <=0 OR sls_price IS NULL --handle invalid price values
 		        THEN ABS( sls_sales ) / NULLIF( sls_quantity, 0 )
 		        ELSE sls_price
 		    END sls_price
@@ -244,15 +243,15 @@ BEGIN
 			
 		SELECT
 		    CASE
-		        WHEN TRIM( cid ) LIKE 'NAS%'
+		        WHEN TRIM( cid ) LIKE 'NAS%' --ensure consistency of customer keys
 		        THEN SUBSTRING( cid, 4)
 		        ELSE cid
 		    END cid,
 		    CASE
-				WHEN bdate > GETDATE() THEN NULL
+				WHEN bdate > GETDATE() THEN NULL --handle invalid birth dates
 				ELSE bdate
 			END bdate,
-		    CASE 
+		    CASE --map data with meaningful labels
 		        WHEN UPPER( TRIM( gen ) ) IN ('M', 'MALE') THEN 'Male'
 		        WHEN UPPER( TRIM( gen ) ) IN ('F', 'FEMALE') THEN 'Female'
 		        ELSE 'n/a'
@@ -277,9 +276,9 @@ BEGIN
 		)
 			
 		SELECT
-		    REPLACE( TRIM(cid), '-', '' ) cid,
-		    CASE
-		        WHEN TRIM( cntry ) = 'DE' THEN 'Germany'
+		    REPLACE( TRIM(cid), '-', '' ) cid, --ensure consistency of customer keys
+		    CASE --rename repeating country abbreviations
+		        WHEN TRIM( cntry ) = 'DE' THEN 'Germany' 
 				WHEN TRIM( cntry ) IN ('US', 'USA') THEN 'United States'
 				WHEN TRIM( cntry ) = '' OR cntry IS NULL THEN 'n/a'
 				ELSE TRIM( cntry )
@@ -306,7 +305,7 @@ BEGIN
 		)
 			
 		SELECT
-		    CASE WHEN id='CO_PD' THEN 'CO_PE' ELSE id
+		    CASE WHEN id='CO_PD' THEN 'CO_PE' ELSE id --correc faulty category id
 		    END id,
 		    cat,
 		    subcat,
