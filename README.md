@@ -47,7 +47,7 @@ All tools listed below are **free to use**:
 * **[GitHub](https://github.com/)**: Version control and collaboration platform.
 * **[Draw.io](https://www.drawio.com/)**: Tool for designing data architectures, models, and workflows.
 * **[Notion](https://www.notion.com/)**: Project documentation and task management.
-* **[Notion Project Steps](https://thankful-pangolin-2ca.notion.site/SQL-Data-Warehouse-Project-16ed041640ef80489667cfe2f380b269?pvs=4)**: Detailed project phases and tasks.
+* **[Notion Project Steps](https://solar-mist-741.notion.site/Data-Warehouse-Project-2c82f9f58e8480f09e8fe36d7bf861d2)**: Detailed project phases and tasks.
 
 ---
 
