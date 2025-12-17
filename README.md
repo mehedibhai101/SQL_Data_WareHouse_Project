@@ -105,6 +105,11 @@ data-warehouse-project/
 │
 ├── Tests/                              # Data quality and validation tests
 │
+├── Analysis/                           # Analytical scripts and Business insights
+│   ├── A.Exploratory Analysis/         # Data profiling, dimension auditing, and KPI discovery
+│   ├── B.Descriptive Analysis/         # Trend analysis, performance benchmarking, and segmentation
+│   └── C.Reporting/                    # Production-ready Customer, Product, and Sales insights
+│
 ├── README.md                           # Project overview and setup instructions
 ├── LICENSE                             # License information
 └── .gitignore                          # Git ignore rules
