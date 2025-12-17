@@ -42,21 +42,20 @@ FROM CTE_Sales_Time;
 
 
 -- Moving Average Sales over Time
-
 WITH CTE_Sales_Time_Order AS (
     SELECT
         DATETRUNC( month, order_date ) Year_Month,
-        order_number,
+        COUNT( DISTINCT order_number ) Total_Orders,
         SUM( sales_amount ) Total_Sales_Order
     FROM Gold.fact_sales
     WHERE order_date IS NOT NULL
-    GROUP BY DATETRUNC( month, order_date ),  order_number
+    GROUP BY DATETRUNC( month, order_date )
 ) 
 SELECT
     Year_Month,
-    AVG( Total_Sales_Order ) Moving_Avg_Sales
-FROM CTE_Sales_Time_Order
-GROUP BY Year_Month;
+    AVG( CASE WHEN Total_Orders = 0 THEN 0 ELSE Total_Sales_Order / Total_Orders END ) 
+        OVER( ORDER BY Year_Month ) Moving_Avg_Sales
+FROM CTE_Sales_Time_Order;
 
 
 -- Rolling Total Sales (Year) over Time
