@@ -1,6 +1,6 @@
 /*
 ===============================================================================
-                              Date Explorations
+                               Date Explorations
 ===============================================================================
 Purpose:
     - To analyze the chronological lifespan of business operations.
