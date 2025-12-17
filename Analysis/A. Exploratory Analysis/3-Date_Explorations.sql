@@ -38,7 +38,7 @@ PRINT '            Business Lifespan'
 PRINT '======================================='
 PRINT 'Business Start Date: ' + CAST( @start_date AS NVARCHAR )
 PRINT 'Last Active Date: ' + CAST( @end_date AS NVARCHAR )
-PRINT 'Total Business Years: ' + CAST( @years AS NVARCHAR )
+PRINT 'Total Business Years: ' + CAST( @years AS NVARCHAR );
 
 
 -- Explore Avg Shipping Duration
@@ -46,7 +46,7 @@ PRINT 'Total Business Years: ' + CAST( @years AS NVARCHAR )
 SELECT
     ROUND( AVG( CAST( DATEDIFF( day, order_date, shipping_date ) AS FLOAT ) ), 5 )
         AS 'Avg_Shipping_Duration(days)'
-FROM Gold.fact_sales
+FROM Gold.fact_sales;
 
 
 -- Explore customer's age range
@@ -61,5 +61,5 @@ UNION ALL
 SELECT
     'Oldest Customer: ',
     MAX(age)
-FROM Gold.dim_customer
+FROM Gold.dim_customer;
 
