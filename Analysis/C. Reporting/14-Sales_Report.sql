@@ -24,11 +24,11 @@ GO
 
 -----
 
-IF OBJECT_ID( 'Gold.report_trends', 'V' ) IS NOT NULL
-    DROP VIEW Gold.report_trends;
+IF OBJECT_ID( 'Gold.report_sales', 'V' ) IS NOT NULL
+    DROP VIEW Gold.report_sales;
 GO
 
-CREATE VIEW Gold.report_trends AS
+CREATE VIEW Gold.report_sales AS
 
 
 /*--------------------------------------------------------
@@ -99,7 +99,6 @@ GO
 
 -- Query the View to see the Report
 
-SELECT * FROM Gold.report_trends
-ORDER BY order_month;
+SELECT * FROM Gold.report_sales;
 GO
 
